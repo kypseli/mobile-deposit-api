@@ -1,62 +1,33 @@
 pipeline {
     options { 
         buildDiscarder(logRotator(numToKeepStr: '5')) 
-        skipDefaultCheckout() 
     }
-    agent none
+    agent {label 'docker'}
     environment {
         DOCKER_HUB_USER = 'beedemo'
         DOCKER_CREDENTIAL_ID = 'docker-hub-beedemo'
     }
     stages {
-        stage('Checkout') {
-            agent { label 'docker' }
-            steps {
-                checkout scm
-                gitShortCommit(7)
-            }
-        }
-        stage('Create Build Cache') {
-            agent { label 'docker' }
-            when {
-                beforeAgent true
-                branch 'maven-build-cache'
-            }
-            steps {
-                buildMavenCacheImage("${DOCKER_HUB_USER}", "mobile-depoist-api-mvn-cache", "${DOCKER_CREDENTIAL_ID}")
-            }
-        }
         stage('Build') {
             agent { 
                 docker { 
-                    image "beedemo/mobile-depoist-api-mvn-cache"
+                    image "mave:3.5-jdk-8-alpine"
                 } 
             }
-            when {
-                beforeAgent true
-                not {
-                    branch 'maven-build-cache'
-                }
-            }
             steps {
-                sh 'mvn -Dmaven.repo.local=/usr/share/maven/ref -DGIT_COMMIT="${SHORT_COMMIT}" -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL} clean package'
+                gitShortCommit(7)
+                sh 'mvn -DGIT_COMMIT="${SHORT_COMMIT}" -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL} clean package'
                 junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
                 stash name: 'jar-dockerfile', includes: '**/target/*.jar,**/target/Dockerfile'
             }
         }
         stage('Quality Analysis') {
-            when {
-                beforeAgent true
-                not {
-                    branch "maven-build-cache"
-                }
-            }
             failFast true
             parallel {
                 stage('Integration Tests') {
                     agent { 
                         docker { 
-                            image "beedemo/mobile-depoist-api-mvn-cache"
+                            image "mave:3.5-jdk-8-alpine"
                         } 
                     }
                     steps {
@@ -66,7 +37,7 @@ pipeline {
                 stage('Sonar Analysis') {
                     agent { 
                         docker { 
-                            image "beedemo/mobile-depoist-api-mvn-cache"
+                            image "mave:3.5-jdk-8-alpine"
                         } 
                     }
                     environment {
@@ -82,12 +53,6 @@ pipeline {
         }
         stage('Quality Gate') {
             agent none
-            when {
-                beforeAgent true
-                not {
-                    branch "maven-build-cache"
-                }
-            }
             steps {
                 timeout(time: 4, unit: 'MINUTES') {
                     script {
@@ -103,7 +68,6 @@ pipeline {
             environment {
                 DOCKER_TAG = "${BUILD_NUMBER}-${SHORT_COMMIT}"
             }
-            agent { label 'docker' }
             when {
                 beforeAgent true
                 branch 'master'
@@ -126,6 +90,7 @@ pipeline {
                 ok "Yes"
                 submitter "kypseli*ops"
             }
+            agent none
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
                     checkpoint 'Before Deploy'
