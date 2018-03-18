@@ -116,12 +116,11 @@ pipeline {
             when {
                 branch 'master'
             }
+            input(message: "Proceed with deployment?", ok: "Yes")
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
-                    slackSend(color: "warning", message: "${env.JOB_NAME} awaiting approval at: ${env.RUN_DISPLAY_URL}")
-                    input(message: "Proceed with deployment?", ok: "Yes")
                     checkpoint 'Before Deploy'
-                    dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-api', 8080, 8080, "${DOCKER_TAG}")
+                    kubeDeploy("dind", 'mobile-deposit-api', 8081, 8080, "${DOCKER_TAG}")
                 }
             }
         }
