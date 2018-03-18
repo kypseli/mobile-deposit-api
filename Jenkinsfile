@@ -10,14 +10,14 @@ pipeline {
     }
     stages {
         stage('Checkout') {
-            agent { label 'docker-cloud' }
+            agent { label 'dind' }
             steps {
                 checkout scm
                 gitShortCommit(7)
             }
         }
         stage('Create Build Cache') {
-            agent { label 'docker-cloud' }
+            agent { label 'dind' }
             when {
                 branch 'maven-build-cache'
             }
@@ -99,7 +99,7 @@ pipeline {
             environment {
                 DOCKER_TAG = "${BUILD_NUMBER}-${SHORT_COMMIT}"
             }
-            agent { label 'docker-cloud' }
+            agent { label 'dind' }
             when {
                 branch 'master'
             }
