@@ -116,7 +116,11 @@ pipeline {
             when {
                 branch 'master'
             }
-            input(message: "Proceed with deployment?", ok: "Yes")
+            input {
+                message "Deploy to prod?"
+                ok "Yes"
+                submitter "kypseli*ops"
+            }
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
                     checkpoint 'Before Deploy'
