@@ -10,15 +10,16 @@ pipeline {
     }
     stages {
         stage('Checkout') {
-            agent { label 'dind' }
+            agent { label 'docker' }
             steps {
                 checkout scm
                 gitShortCommit(7)
             }
         }
         stage('Create Build Cache') {
-            agent { label 'dind' }
+            agent { label 'docker' }
             when {
+                beforeAgent true
                 branch 'maven-build-cache'
             }
             steps {
@@ -32,6 +33,7 @@ pipeline {
                 } 
             }
             when {
+                beforeAgent true
                 not {
                     branch 'maven-build-cache'
                 }
@@ -44,6 +46,7 @@ pipeline {
         }
         stage('Quality Analysis') {
             when {
+                beforeAgent true
                 not {
                     branch "maven-build-cache"
                 }
@@ -80,6 +83,7 @@ pipeline {
         stage('Quality Gate') {
             agent none
             when {
+                beforeAgent true
                 not {
                     branch "maven-build-cache"
                 }
@@ -99,8 +103,9 @@ pipeline {
             environment {
                 DOCKER_TAG = "${BUILD_NUMBER}-${SHORT_COMMIT}"
             }
-            agent { label 'dind' }
+            agent { label 'docker' }
             when {
+                beforeAgent true
                 branch 'master'
             }
             steps {
