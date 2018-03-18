@@ -120,7 +120,7 @@ pipeline {
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
                     checkpoint 'Before Deploy'
-                    kubeDeploy("dind", 'mobile-deposit-api', 8081, 8080, "${DOCKER_TAG}")
+                    kubeDeploy('mobile-deposit-api', 'beedemo', "${DOCKER_TAG}", "prod")
                 }
             }
         }
