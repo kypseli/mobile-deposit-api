@@ -70,8 +70,8 @@ pipeline {
                 branch 'master'
             }
             steps {
-                checkpoint 'Before Docker Build and Push'
-                unstash 'jar-dockerfile'
+                //checkpoint 'Before Docker Build and Push'
+                //unstash 'jar-dockerfile'
                 container('docker') {
                     dockerBuildPush("${DOCKER_HUB_USER}", "mobile-deposit-api", "${DOCKER_TAG}", "target", "${DOCKER_CREDENTIAL_ID}")
                 }
