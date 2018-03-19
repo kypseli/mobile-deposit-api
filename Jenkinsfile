@@ -94,10 +94,7 @@ pipeline {
                 submitter "kypseli*ops"
             }
             steps {
-                //kubeDeploy('mobile-deposit-api', 'beedemo', "${DOCKER_TAG}", "prod")
-                container("kubectl") {
-                    sh "kubectl set image deployment/mobile-deposit-api-app mobile-deposit-api-app=beedemo/mobile-deposit-api:${DOCKER_TAG}"
-                }
+                kubeDeploy('mobile-deposit-api', 'beedemo', "${DOCKER_TAG}", "prod")
             }
         }
     }
