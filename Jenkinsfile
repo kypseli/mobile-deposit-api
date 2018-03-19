@@ -49,14 +49,15 @@ pipeline {
             }
         }
         stage('Quality Gate') {
+            options {
+                timeout(time: 5, unit: 'MINUTES') 
+            }
             agent none
             steps {
-                timeout(time: 4, unit: 'MINUTES') {
-                    script {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            error "Pipeline failure due to quality gate failure: ${qg.status}"
-                        }
+                script {
+                    def qg = waitForQualityGate()
+                    if (qg.status != 'OK') {
+                        error "Pipeline failure due to quality gate failure: ${qg.status}"
                     }
                 }
             }
@@ -78,6 +79,9 @@ pipeline {
             }
         }
         stage('Deploy') {
+            options {
+                timeout(time: 10, unit: 'MINUTES') 
+            }
             environment {
                 DOCKER_TAG = "${BUILD_NUMBER}-${SHORT_COMMIT}"
             }
@@ -90,9 +94,7 @@ pipeline {
                 submitter "kypseli*ops"
             }
             steps {
-                timeout(time: 10, unit: 'MINUTES') {
-                    kubeDeploy('mobile-deposit-api', 'beedemo', "${DOCKER_TAG}", "prod")
-                }
+                kubeDeploy('mobile-deposit-api', 'beedemo', "${DOCKER_TAG}", "prod")
             }
         }
     }
