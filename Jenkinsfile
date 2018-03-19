@@ -30,7 +30,7 @@ pipeline {
                 stage('Integration Tests') {
                     steps {
                         container('maven') {
-                            sh 'mvn -Dmaven.repo.local=/usr/share/maven/ref verify'
+                            sh 'mvn verify'
                         }
                     }
                 }
@@ -41,7 +41,7 @@ pipeline {
                     steps {
                         withSonarQubeEnv('beedemo') {
                             container('maven') {
-                                sh 'mvn -Dmaven.repo.local=/usr/share/maven/ref -Dsonar.scm.disabled=True -Dsonar.login=$SONAR -Dsonar.branch=$BRANCH_NAME sonar:sonar'
+                                sh 'mvn -Dsonar.scm.disabled=True -Dsonar.login=$SONAR -Dsonar.branch=$BRANCH_NAME sonar:sonar'
                             }
                         }
                     }
