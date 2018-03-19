@@ -8,6 +8,11 @@ pipeline {
         DOCKER_CREDENTIAL_ID = 'docker-hub-beedemo'
     }
     stages {
+        stage('Prep') {
+            steps {
+                gitShortCommit(7)
+            }
+        }
         stage('Build') {
             agent { 
                 docker { 
@@ -16,7 +21,6 @@ pipeline {
                 } 
             }
             steps {
-                gitShortCommit(7)
                 sh 'mvn -DGIT_COMMIT="${env.SHORT_COMMIT}" -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL} clean package'
                 junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
                 stash name: 'jar-dockerfile', includes: '**/target/*.jar,**/target/Dockerfile'
