@@ -14,14 +14,10 @@ pipeline {
             }
         }
         stage('Build') {
-            agent { 
-                docker { 
-                    image "maven:3.5-jdk-8-alpine"
-                    reuseNode true
-                } 
-            }
             steps {
-                sh 'mvn -DGIT_COMMIT="${env.SHORT_COMMIT}" -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL} clean package'
+                container('maven') {
+                    sh 'mvn -DGIT_COMMIT="${env.SHORT_COMMIT}" -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL} clean package'
+                }
                 junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
                 stash name: 'jar-dockerfile', includes: '**/target/*.jar,**/target/Dockerfile'
             }
@@ -30,29 +26,21 @@ pipeline {
             failFast true
             parallel {
                 stage('Integration Tests') {
-                    agent { 
-                        docker { 
-                            image "maven:3.5-jdk-8-alpine"
-                            reuseNode true
-                        } 
-                    }
                     steps {
-                        sh 'mvn -Dmaven.repo.local=/usr/share/maven/ref verify'
+                        container('maven') {
+                            sh 'mvn -Dmaven.repo.local=/usr/share/maven/ref verify'
+                        }
                     }
                 }
                 stage('Sonar Analysis') {
-                    agent { 
-                        docker { 
-                            image "maven:3.5-jdk-8-alpine"
-                            reuseNode true
-                        } 
-                    }
                     environment {
                         SONAR = credentials('sonar.beedemo')
                     }
                     steps {
                         withSonarQubeEnv('beedemo') {
-                            sh 'mvn -Dmaven.repo.local=/usr/share/maven/ref -Dsonar.scm.disabled=True -Dsonar.login=$SONAR -Dsonar.branch=$BRANCH_NAME sonar:sonar'
+                            container('maven') {
+                                sh 'mvn -Dmaven.repo.local=/usr/share/maven/ref -Dsonar.scm.disabled=True -Dsonar.login=$SONAR -Dsonar.branch=$BRANCH_NAME sonar:sonar'
+                            }
                         }
                     }
                 }
@@ -82,7 +70,9 @@ pipeline {
             steps {
                 checkpoint 'Before Docker Build and Push'
                 unstash 'jar-dockerfile'
-                dockerBuildPush("${DOCKER_HUB_USER}", "mobile-deposit-api", "${DOCKER_TAG}", "target", "${DOCKER_CREDENTIAL_ID}")
+                container('docker') {
+                    dockerBuildPush("${DOCKER_HUB_USER}", "mobile-deposit-api", "${DOCKER_TAG}", "target", "${DOCKER_CREDENTIAL_ID}")
+                }
             }
         }
         stage('Deploy') {
