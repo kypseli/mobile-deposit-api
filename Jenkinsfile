@@ -11,7 +11,7 @@ pipeline {
         stage('Build') {
             agent { 
                 docker { 
-                    image "mave:3.5-jdk-8-alpine"
+                    image "maven:3.5-jdk-8-alpine"
                 } 
             }
             steps {
@@ -27,7 +27,7 @@ pipeline {
                 stage('Integration Tests') {
                     agent { 
                         docker { 
-                            image "mave:3.5-jdk-8-alpine"
+                            image "maven:3.5-jdk-8-alpine"
                         } 
                     }
                     steps {
@@ -37,7 +37,7 @@ pipeline {
                 stage('Sonar Analysis') {
                     agent { 
                         docker { 
-                            image "mave:3.5-jdk-8-alpine"
+                            image "maven:3.5-jdk-8-alpine"
                         } 
                     }
                     environment {
