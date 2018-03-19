@@ -3,21 +3,8 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '5')) 
     }
     agent {
-    kubernetes {
-      label 'docker'
-      containerTemplate {
-        name 'maven'
-        image 'maven:3.3.9-jdk-8-alpine'
-        ttyEnabled true
-        command 'cat'
-      }
-      persistentVolumeClaim {
-          mountPath: '/root/.m2/repository'
-          claimName: 'mobile-deposit-api-master-maven-cache'
-          readOnly: false
-      }
+        label 'docker'
     }
-  }
     environment {
         DOCKER_HUB_USER = 'beedemo'
         DOCKER_CREDENTIAL_ID = 'docker-hub-beedemo'
