@@ -89,10 +89,8 @@ pipeline {
                 ok "Yes"
                 submitter "kypseli*ops"
             }
-            agent none
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
-                    checkpoint 'Before Deploy'
                     kubeDeploy('mobile-deposit-api', 'beedemo', "${DOCKER_TAG}", "prod")
                 }
             }
