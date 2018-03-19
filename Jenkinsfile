@@ -12,6 +12,7 @@ pipeline {
             agent { 
                 docker { 
                     image "maven:3.5-jdk-8-alpine"
+                    reuseNode true
                 } 
             }
             steps {
@@ -28,6 +29,7 @@ pipeline {
                     agent { 
                         docker { 
                             image "maven:3.5-jdk-8-alpine"
+                            reuseNode true
                         } 
                     }
                     steps {
@@ -38,6 +40,7 @@ pipeline {
                     agent { 
                         docker { 
                             image "maven:3.5-jdk-8-alpine"
+                            reuseNode true
                         } 
                     }
                     environment {
