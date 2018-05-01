@@ -3,11 +3,7 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '5')) 
     }
     agent {
-        label 'docker'
-    }
-    environment {
-        DOCKER_HUB_USER = 'beedemo'
-        DOCKER_CREDENTIAL_ID = 'docker-hub-beedemo'
+        label 'default'
     }
     stages {
         stage('Prep') {
@@ -17,7 +13,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                container('maven') {
+                container('maven-jdk9') {
                     sh "mvn -DGIT_COMMIT='${SHORT_COMMIT}' -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL} clean package"
                 }
                 junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
@@ -29,7 +25,7 @@ pipeline {
             parallel {
                 stage('Integration Tests') {
                     steps {
-                        container('maven') {
+                        container('maven-jdk9') {
                             sh 'mvn verify'
                         }
                     }
@@ -40,7 +36,7 @@ pipeline {
                     }
                     steps {
                         withSonarQubeEnv('beedemo') {
-                            container('maven') {
+                            container('maven-jdk9') {
                                 sh 'mvn -Dsonar.scm.disabled=True -Dsonar.login=$SONAR -Dsonar.branch=$BRANCH_NAME sonar:sonar'
                             }
                         }
@@ -73,9 +69,7 @@ pipeline {
             steps {
                 //checkpoint 'Before Docker Build and Push'
                 //unstash 'jar-dockerfile'
-                container('docker') {
-                    dockerBuildPush("${DOCKER_HUB_USER}", "mobile-deposit-api", "${DOCKER_TAG}", "target", "${DOCKER_CREDENTIAL_ID}")
-                }
+                dockerBuildPush("${DOCKER_HUB_USER}", "mobile-deposit-api", "${DOCKER_TAG}", "target", "${DOCKER_CREDENTIAL_ID}")
             }
         }
         stage('Deploy') {
