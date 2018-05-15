@@ -1,3 +1,4 @@
+library 'kypseli'
 pipeline {
     options { 
         buildDiscarder(logRotator(numToKeepStr: '5')) 
@@ -35,11 +36,8 @@ pipeline {
                         SONAR = credentials('sonar.beedemo')
                     }
                     steps {
-                        withSonarQubeEnv('beedemo') {
-                            container('maven-jdk9') {
-                                sh 'mvn -Dsonar.scm.disabled=True -Dsonar.login=$SONAR -Dsonar.branch=$BRANCH_NAME sonar:sonar'
-                            }
-                        }
+                        //TODO
+                        echo "TODO"
                     }
                 }
             }
@@ -50,12 +48,13 @@ pipeline {
             }
             agent none
             steps {
-                script {
+                echo "TODO"
+                /*script {
                     def qg = waitForQualityGate()
                     if (qg.status != 'OK') {
                         error "Pipeline failure due to quality gate failure: ${qg.status}"
                     }
-                }
+                }*/
             }
         }
         stage('Build & Push Docker Image') {
@@ -69,7 +68,8 @@ pipeline {
             steps {
                 //checkpoint 'Before Docker Build and Push'
                 //unstash 'jar-dockerfile'
-                dockerBuildPush("${DOCKER_HUB_USER}", "mobile-deposit-api", "${DOCKER_TAG}", "target", "${DOCKER_CREDENTIAL_ID}")
+                dir 'target'
+                dockerBuildPush("mobile-deposit-api", "${DOCKER_TAG}")
             }
         }
         stage('Deploy') {
@@ -88,16 +88,17 @@ pipeline {
                 submitter "kypseli*ops"
             }
             steps {
-                kubeDeploy('mobile-deposit-api', 'beedemo', "${DOCKER_TAG}", "prod")
+                echo "TODO"
+                //kubeDeploy('mobile-deposit-api', 'beedemo', "${DOCKER_TAG}", "prod")
             }
         }
     }
     post {
         success {
-            hipchatSend color: 'GREEN', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} status: SUCCESS <a href=\'${env.BUILD_URL}\'>Open</a>", room: '1613593', server: 'cloudbees.hipchat.com', credentialId: 'hipchat-sa-demo-environment', v2enabled: true
+            ehco "TODO send slack message"
         }
         failure {
-            hipchatSend color: 'RED', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} status: FAILURE <a href=\'${env.BUILD_URL}\'>Open</a>", room: '1613593', server: 'cloudbees.hipchat.com', credentialId: 'hipchat-sa-demo-environment', v2enabled: true
+            ehco "TODO send slack message"
         }
     }
 }
