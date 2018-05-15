@@ -95,10 +95,10 @@ pipeline {
     }
     post {
         success {
-            ehco "TODO send slack message"
+            echo "TODO send slack message"
         }
         failure {
-            ehco "TODO send slack message"
+            echo "TODO send slack message"
         }
     }
 }
