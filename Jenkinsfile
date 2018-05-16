@@ -14,7 +14,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                container('maven-jdk9') {
+                container('maven-jdk8') {
                     sh "mvn -DGIT_COMMIT='${SHORT_COMMIT}' -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL} clean package"
                 }
                 junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
@@ -26,7 +26,7 @@ pipeline {
             parallel {
                 stage('Integration Tests') {
                     steps {
-                        container('maven-jdk9') {
+                        container('maven-jdk8') {
                             sh 'mvn verify'
                         }
                     }
