@@ -91,9 +91,10 @@ pipeline {
 
             steps {
                 //checkpoint 'Before Docker Build and Push'
-                unstash 'jar-dockerfile'
-                dir 'target'
-                dockerBuildPush("mobile-deposit-api", "${DOCKER_TAG}")
+                dockerBuildPush("mobile-deposit-api", "${DOCKER_TAG}") {
+                  unstash 'jar-dockerfile'
+                  dir 'target'
+                }
             }
         }
         stage('Deploy') {
