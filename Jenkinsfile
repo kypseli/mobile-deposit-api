@@ -27,7 +27,7 @@ pipeline {
         volumes:
           - name: efs-pvc
             persistentVolumeClaim:
-              claimName: mobile-deposit-api_test
+              claimName: mobile-deposit-api-test
       """
       }
     }
