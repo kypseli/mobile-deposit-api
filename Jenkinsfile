@@ -52,7 +52,8 @@ pipeline {
                 stage('Integration Tests') {
                     steps {
                         container('maven') {
-                            sh 'mvn verify'
+                            //sh 'mvn verify'
+                            echo "verify"
                         }
                     }
                 }
