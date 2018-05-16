@@ -86,10 +86,7 @@ pipeline {
             environment {
                 DOCKER_TAG = "${BUILD_NUMBER}-${SHORT_COMMIT}"
             }
-            when {
-                beforeAgent true
-                branch 'master'
-            }
+
             steps {
                 //checkpoint 'Before Docker Build and Push'
                 //unstash 'jar-dockerfile'
@@ -105,6 +102,7 @@ pipeline {
                 DOCKER_TAG = "${BUILD_NUMBER}-${SHORT_COMMIT}"
             }
             when {
+                beforeAgent true
                 branch 'master'
             }
             input {
