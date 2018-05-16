@@ -3,8 +3,33 @@ pipeline {
     options { 
         buildDiscarder(logRotator(numToKeepStr: '5')) 
     }
-    agent {
-        label 'default'
+  agent {
+    kubernetes {
+      label 'mypod'
+      defaultContainer 'jnlp'
+      yaml """
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        labels:
+          some-label: some-label-value
+      spec:
+        containers:
+        - name: maven
+          image: maven:alpine
+          command:
+          - cat
+          tty: true
+          volumeMounts:
+            - name: efs-pvc
+              mountPath: "/root/.m2/repository"
+        restartPolicy: "Never"
+        volumes:
+          - name: efs-pvc
+            persistentVolumeClaim:
+              claimName: mobile-deposit-api_test
+      """
+      }
     }
     stages {
         stage('Prep') {
@@ -14,7 +39,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                container('maven-jdk8') {
+                container('maven') {
                     sh "mvn -DGIT_COMMIT='${SHORT_COMMIT}' -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL} clean package"
                 }
                 junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
@@ -26,7 +51,7 @@ pipeline {
             parallel {
                 stage('Integration Tests') {
                     steps {
-                        container('maven-jdk8') {
+                        container('maven') {
                             sh 'mvn verify'
                         }
                     }
