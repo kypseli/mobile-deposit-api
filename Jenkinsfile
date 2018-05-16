@@ -84,6 +84,7 @@ pipeline {
             }
         }
         stage('Build & Push Docker Image') {
+            agent none
             environment {
                 DOCKER_TAG = "${BUILD_NUMBER}-${SHORT_COMMIT}"
             }
