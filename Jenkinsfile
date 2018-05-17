@@ -88,12 +88,12 @@ pipeline {
             kubernetes {
               label 'kaniko'
               defaultContainer 'jnlp'
-              namespace 'kaniko'
               yaml """
                apiVersion: v1
                kind: Pod
                metadata:
                  name: kaniko
+                 namespace: kaniko
                spec:
                  containers:
                  - name: kaniko
