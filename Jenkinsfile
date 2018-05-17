@@ -118,9 +118,11 @@ pipeline {
                        ) {
                        node(label) {
                          stage('Build with Kaniko') {
+                           pwd()
                            unstash 'jar-dockerfile'
+                           sh 'ls -la'
                            container('kaniko') {
-                             sh "/kaniko/executor -c ${pwd}/target/. -v debug --destination=beedemo/mobile-deposit-api:kaniko-1"
+                             sh "/kaniko/executor -c ${pwd()}/target/Dockerfile -v debug --destination=beedemo/mobile-deposit-api:kaniko-1"
                            }
                          }
                        }
