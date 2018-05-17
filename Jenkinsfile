@@ -84,6 +84,7 @@ pipeline {
             }
         }
         stage('Build & Push Docker Image') {
+          options { skipDefaultCheckout() }
           agent {
             kubernetes {
               label 'kaniko'
