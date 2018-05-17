@@ -93,7 +93,6 @@ pipeline {
                kind: Pod
                metadata:
                  name: kaniko
-                 namespace: kaniko
                spec:
                  containers:
                  - name: kaniko
