@@ -92,7 +92,7 @@ pipeline {
                 //checkpoint 'Before Docker Build and Push'
                 script {
                     def label = "kaniko-${UUID.randomUUID().toString()}"
-                     podTemplate(name: 'kaniko', label: label, yaml: """
+                     podTemplate(name: 'kaniko', label: label, namespace:'kaniko', yaml: """
                      kind: Pod
                      metadata:
                        name: kaniko
