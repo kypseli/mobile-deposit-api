@@ -90,6 +90,7 @@ pipeline {
           steps {
             dockerBuildPush('mobile-deposit-api', 'kaniko-3', './target/Dockerfile') {
               unstash 'jar-dockerfile'
+            }
           }
         }
         stage('Deploy') {
