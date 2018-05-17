@@ -88,6 +88,7 @@ pipeline {
             kubernetes {
               label 'kaniko'
               defaultContainer 'jnlp'
+              inheritFrom 'kaniko'
               yaml """
                apiVersion: v1
                kind: Pod
