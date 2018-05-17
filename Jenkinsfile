@@ -120,7 +120,7 @@ pipeline {
                          stage('Build with Kaniko') {
                            unstash 'jar-dockerfile'
                            container('kaniko') {
-                               sh '/kaniko/executor -c . --destination=beedemo/mobile-deposit-api:kaniko-1'
+                               sh '/kaniko/executor -c ./target/. -v debug --destination=beedemo/mobile-deposit-api:kaniko-1'
                            }
                          }
                        }
