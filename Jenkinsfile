@@ -83,46 +83,47 @@ pipeline {
                 }*/
             }
         }
-
+        stage('Docker Build and Push') {
+          agent none
         //checkpoint 'Before Docker Build and Push'
-        script {
-            def label = "kaniko-${UUID.randomUUID().toString()}"
-             podTemplate(name: 'kaniko', label: label, namespace:'kaniko', yaml: """
-             kind: Pod
-             metadata:
-               name: kaniko
-             spec:
-               containers:
-               - name: kaniko
-                 image: beedemo/kaniko:jenkins-k8s-3 # we need a patched version of kaniko for now
-                 workingDir: /home/root
-                 imagePullPolicy: Always
-                 command:
-                 - cat
-                 tty: true
-                 volumeMounts:
-                   - name: jenkins-docker-cfg
-                     mountPath: /root/.docker
-               volumes:
-                 - name: jenkins-docker-cfg
-                   secret:
-                     secretName: jenkins-docker-cfg
-                     items:
-                     - key: .dockerconfigjson
-                       path: config.json
-             """
-               ) {
-               node(label) {
-                 stage('Docker Build & Push') {
-                   container('kaniko') {
-                     unstash 'jar-dockerfile'
-                     sh "cd target && /kaniko/executor -c . -v debug --destination=beedemo/mobile-deposit-api:kaniko-1"
+          steps {
+            script {
+                def label = "kaniko-${UUID.randomUUID().toString()}"
+                 podTemplate(name: 'kaniko', label: label, namespace:'kaniko', yaml: """
+                 kind: Pod
+                 metadata:
+                   name: kaniko
+                 spec:
+                   containers:
+                   - name: kaniko
+                     image: beedemo/kaniko:jenkins-k8s-3 # we need a patched version of kaniko for now
+                     workingDir: /home/root
+                     imagePullPolicy: Always
+                     command:
+                     - cat
+                     tty: true
+                     volumeMounts:
+                       - name: jenkins-docker-cfg
+                         mountPath: /root/.docker
+                   volumes:
+                     - name: jenkins-docker-cfg
+                       secret:
+                         secretName: jenkins-docker-cfg
+                         items:
+                         - key: .dockerconfigjson
+                           path: config.json
+                 """
+                   ) {
+                   node(label) {
+                     container('kaniko') {
+                       unstash 'jar-dockerfile'
+                       sh "cd target && /kaniko/executor -c . -v debug --destination=beedemo/mobile-deposit-api:kaniko-1"
+                     }
                    }
                  }
-               }
-             }
+            }
+          }
         }
-
         stage('Deploy') {
             options {
                 timeout(time: 10, unit: 'MINUTES') 
