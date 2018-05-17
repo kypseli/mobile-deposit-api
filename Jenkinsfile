@@ -95,6 +95,7 @@ pipeline {
                containers:
                - name: kaniko
                  image: beedemo/kaniko:jenkins-k8s-3 # we need a patched version of kaniko for now
+                 workingDir: /home/root
                  imagePullPolicy: Always
                  command:
                  - cat
@@ -113,8 +114,8 @@ pipeline {
                ) {
                node(label) {
                  stage('Docker Build & Push') {
-                   unstash 'jar-dockerfile'
                    container('kaniko') {
+                     unstash 'jar-dockerfile'
                      sh "cd target && /kaniko/executor -c . -v debug --destination=beedemo/mobile-deposit-api:kaniko-1"
                    }
                  }
