@@ -1,11 +1,11 @@
 library 'kypseli'
 pipeline {
-    options { 
-        buildDiscarder(logRotator(numToKeepStr: '5')) 
-    }
+  options { 
+    buildDiscarder(logRotator(numToKeepStr: '5')) 
+  }
   agent {
     kubernetes {
-      label 'mypod'
+      label 'maven'
       defaultContainer 'jnlp'
       yaml """
       apiVersion: v1
@@ -84,15 +84,45 @@ pipeline {
             }
         }
         stage('Build & Push Docker Image') {
-            agent none
+          agent {
+            kubernetes {
+              label 'kaniko'
+              defaultContainer 'jnlp'
+              namespace 'kaniko'
+              yaml """
+               apiVersion: v1
+               kind: Pod
+               metadata:
+                 name: kaniko
+               spec:
+                 containers:
+                 - name: kaniko
+                   image: beedemo/kaniko:jenkins-k8s-3 # we need a patched version of kaniko for now
+                   imagePullPolicy: Always
+                   command:
+                   - cat
+                   tty: true
+                   volumeMounts:
+                     - name: jenkins-docker-cfg
+                       mountPath: /root/.docker
+                 volumes:
+                   - name: jenkins-docker-cfg
+                     secret:
+                       secretName: jenkins-docker-cfg
+                       items:
+                       - key: .dockerconfigjson
+                         path: config.json
+              """
+              }
+            }
             environment {
                 DOCKER_TAG = "${BUILD_NUMBER}-${SHORT_COMMIT}"
             }
-
             steps {
                 //checkpoint 'Before Docker Build and Push'
-                dockerBuildPush("mobile-deposit-api", "${DOCKER_TAG}", "./target") {
-                    unstash 'jar-dockerfile'    
+                unstash 'jar-dockerfile'    
+                container('kaniko') {
+                  sh '/kaniko/executor -c . --destination=beedemo/mobile-deposit-api:kaniko-test-1'
                 }
             }
         }
