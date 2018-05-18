@@ -88,7 +88,7 @@ pipeline {
           agent none
         //checkpoint 'Before Docker Build and Push'
           steps {
-            dockerBuildPush('mobile-deposit-api', 'kaniko-3', './target/Dockerfile') {
+            dockerBuildPush('mobile-deposit-api', 'kaniko-3', 'target/.') {
               unstash 'jar-dockerfile'
             }
           }
