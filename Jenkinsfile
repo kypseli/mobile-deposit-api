@@ -2,6 +2,7 @@ library 'kypseli'
 pipeline {
     options { 
         buildDiscarder(logRotator(numToKeepStr: '5')) 
+        skipDefaultCheckout() 
     }
     agent none
     stages {
