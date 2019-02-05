@@ -6,11 +6,6 @@ pipeline {
     }
     agent none
     stages {
-        stage('Prep') {
-            steps {
-                gitShortCommit(7)
-            }
-        }
         stage('Build') {
             steps {
                 mavenCacheBuild("mobile-deposit-api")
